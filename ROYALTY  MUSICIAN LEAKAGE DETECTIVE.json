@@ -1,0 +1,516 @@
+{
+  "name": "ROYALTY  MUSICIAN LEAKAGE DETECTIVE",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "0567f467-a4d6-4e6a-8b57-82f0c72c0334",
+              "leftValue": "={{$json.leakage}}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        800,
+        -208
+      ],
+      "id": "8bc13704-6db2-4957-8da1-a5b24fca2906",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "imaobongemah08@gmail.com",
+        "subject": "=Royalty Payment Dispute - Royalty Audit",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        32
+      ],
+      "id": "71f6c35f-5bd9-49c0-89b1-0791cdb12bf4",
+      "name": "Send Dispute",
+      "webhookId": "3e1236cc-71ea-4881-9ea7-0f7f1dc4dfc8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1UPDeKI8hsu0J967",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1Fe6U54i-xUrwa11wEIu9zaPaAw5RLDF5",
+          "mode": "list",
+          "cachedResultName": "royalty statement",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Fe6U54i-xUrwa11wEIu9zaPaAw5RLDF5"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -944,
+        -432
+      ],
+      "id": "64d6f86f-c0c7-45ad-b0ba-452c4413d53c",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Efhh3szTnRPvXhPo",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -544,
+        -224
+      ],
+      "id": "4e4c6e58-0f1d-4adc-bc56-78e2005f6faa",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "Efhh3szTnRPvXhPo",
+          "name": "Google Drive account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -624,
+        -528
+      ],
+      "id": "93998044-6b9b-4522-8f1b-8ceb8f28fce6",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -208,
+        -320
+      ],
+      "id": "c2a67f89-c8cb-47e9-88b1-cfef56ccce7b",
+      "name": "When chat message received",
+      "webhookId": "ee6476e3-efc1-4326-a63b-f64c37898db3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Normalize the royalty statement data from the previous node into a consistent structure.\n\nUse these fields:\nartist\nsong\nplatform\nstreams\nroyalty_rate\nactual_paid\n\nReturn only the normalized data. Do not add explanations.\n\nExtract the values from the incoming data and make sure:\n- streams is a number\n- royalty_rate is a number\n- actual_paid is a number\n- artist, song, and platform are text\n\nIncoming royalty statement:\n{{ JSON.stringify($json) }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -240,
+        -528
+      ],
+      "id": "b442c532-04d0-473a-b9e7-7fdec47a0f7b",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        -272
+      ],
+      "id": "c1e7e8ef-3d73-4a73-8121-de25c18afe96",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cjJ71EDnyAKAyUxM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://artists.apple.com/support/1124-apple-music-insights-royalty-rate?utm_source=chatgpt.com",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        -512
+      ],
+      "id": "807c9d02-6b51-47e9-80e9-c3576026759b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  let text = item.json.text || \"\";\n\n  text = text\n    .replace(/^```json\\s*/i, \"\")\n    .replace(/^```\\s*/i, \"\")\n    .replace(/\\s*```$/i, \"\")\n    .trim();\n\n  const data = JSON.parse(text);\n\n  let publicRate;\n\n  if (data.platform === \"Apple Music\") {\n    publicRate = 0.01;\n  } else if (data.platform === \"Spotify\") {\n    publicRate = 0.0035;\n  } else if (data.platform === \"YouTube Music\") {\n    publicRate = 0.0025;\n  } else {\n    publicRate = Number(data.royalty_rate) || 0;\n  }\n\n  return {\n    json: {\n      ...data,\n      public_rate: publicRate\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -304
+      ],
+      "id": "4ec5b5c2-f3ec-4192-b7b4-2f12ea398535",
+      "name": "Normalize Royalty Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map(item => {\n  const html = item.json.data || \"\";\n\n  const match = html.match(/Our average per play rate is \\$0\\.01/i);\n\n  return {\n    json: {\n      public_rate: match ? 0.01 : null,\n      rate_source: \"Apple Music for Artists\",\n      rate_note: match\n        ? \"Apple Music published an average per-play rate of $0.01 for Apple Music individual paid plans in 2020.\"\n        : \"Public rate could not be extracted from the source page.\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        -192
+      ],
+      "id": "0820a890-161d-4303-b1ce-af8581fe2f5e",
+      "name": "rate extraction node."
+    },
+    {
+      "parameters": {
+        "jsCode": "const rateItems = $input.all();\nconst originalItems = $('Normalize Royalty Data').all();\n\nreturn rateItems.map((item, index) => {\n  const rateData = item.json;\n  const originalData = originalItems[index].json;\n\n  const streams = Number(originalData.streams);\n  const publicRate = Number(rateData.public_rate);\n  const actualPaid = Number(originalData.actual_paid);\n\n  const expectedRoyalty = streams * publicRate;\n  const leakage = expectedRoyalty - actualPaid;\n\n  let severity;\n  let auditStatus;\n  let disputeRequired;\n\n  if (leakage > 0) {\n    auditStatus = \"UNDERPAID\";\n    disputeRequired = true;\n\n    if (leakage >= 100) {\n      severity = \"HIGH\";\n    } else if (leakage >= 25) {\n      severity = \"MEDIUM\";\n    } else {\n      severity = \"LOW\";\n    }\n  } else if (leakage === 0) {\n    auditStatus = \"CORRECT\";\n    disputeRequired = false;\n    severity = \"NONE\";\n  } else {\n    auditStatus = \"OVERPAID\";\n    disputeRequired = false;\n    severity = \"NONE\";\n  }\n\n  return {\n    json: {\n      ...originalData,\n      public_rate: publicRate,\n      rate_source: rateData.rate_source,\n      rate_note: rateData.rate_note,\n      expected_royalty: expectedRoyalty,\n      leakage: leakage,\n      severity: severity,\n      audit_status: auditStatus,\n      dispute_required: disputeRequired\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        -480
+      ],
+      "id": "4d94d9ca-463d-41c8-aa45-37618f0ffc0f",
+      "name": "Calculate Royalty Leakage"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Draft a formal royalty dispute letter using the audit information from the previous node.\n\nThe letter must include:\n- Artist name\n- Song title\n- Streaming platform\n- Number of streams\n- Public/reference royalty rate\n- Expected royalty\n- Actual amount paid\n- Exact royalty shortfall\n- Severity of the discrepancy\n\nClearly request that the platform review the royalty calculation and pay any outstanding amount.\n\nKeep the tone professional, firm, and respectful.\n\nReturn ONLY the completed dispute letter.\nDo not add explanations or commentary.\n\nAudit information:\n{{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -320,
+        32
+      ],
+      "id": "1c9b4914-0dd7-40c7-8264-09ede7fd271a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -832,
+        160
+      ],
+      "id": "cba66c7c-b4cf-489b-90ef-3f3b62c0ed33",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cjJ71EDnyAKAyUxM",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        32
+      ],
+      "id": "1cd80fa8-2b00-4a9f-a09e-780585e054bf",
+      "name": "Wait",
+      "webhookId": "fdd71f12-4c9c-4810-8750-7b326045fc14"
+    },
+    {
+      "parameters": {
+        "sendTo": "imaobongemah08@gmail.com",
+        "subject": "=Royalty Dispute Escalation - {{ $('Calculate Royalty Leakage').item.json.platform }} - {{ $('Calculate Royalty Leakage').item.json.song }}",
+        "message": "=This is an escalation notice regarding the unresolved royalty dispute.\n\nArtist: {{ $('Calculate Royalty Leakage').item.json.artist }}\nSong: {{ $('Calculate Royalty Leakage').item.json.song }}\nPlatform: {{ $('Calculate Royalty Leakage').item.json.platform }}\n\nExpected Royalty: ${{ $('Calculate Royalty Leakage').item.json.expected_royalty }}\nActual Paid: ${{ $('Calculate Royalty Leakage').item.json.actual_paid }}\nOutstanding Shortfall: ${{ $('Calculate Royalty Leakage').item.json.leakage }}\nSeverity: {{ $('Calculate Royalty Leakage').item.json.severity }}\n\nThe dispute has remained unresolved beyond the response period. Please review and provide an update on the outstanding royalty payment.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        32
+      ],
+      "id": "e178d95d-b333-400f-b1fc-1112c3b2ad6f",
+      "name": "Send a message",
+      "webhookId": "7334d233-7ab8-4f55-b2a4-d72209f2bf0f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "1UPDeKI8hsu0J967",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const originalItems = $('Calculate Royalty Leakage').all();\n\nreturn originalItems.map(item => {\n  const data = item.json;\n\n  return {\n    json: {\n      artist: data.artist,\n      song: data.song,\n      platform: data.platform,\n      streams: data.streams,\n      public_rate: data.public_rate,\n      expected_royalty: Number(data.expected_royalty),\n      actual_paid: Number(data.actual_paid),\n      leakage: Number(data.leakage),\n      severity: data.severity,\n      audit_status: data.audit_status,\n      dispute_required: data.dispute_required,\n      dispute_status: \"ESCALATED\",\n      rate_source: data.rate_source,\n      completed_at: new Date().toISOString()\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        32
+      ],
+      "id": "5a59906e-d0cf-4281-8f7b-1374906f60d5",
+      "name": "Final Audit Summary"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Dispute": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Normalize Royalty Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "rate extraction node.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Royalty Data": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "rate extraction node.": {
+      "main": [
+        [
+          {
+            "node": "Calculate Royalty Leakage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Royalty Leakage": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send Dispute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Final Audit Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "db3654f8-3c5a-4d73-9c96-823955ede704",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "042c773a66bb20d23eb2c4f79eaf2f4045468c565bc22cfa0bbc4e15cddb755c"
+  },
+  "nodeGroups": [],
+  "id": "nMgL9p3mRRX1S11T",
+  "tags": []
+}
